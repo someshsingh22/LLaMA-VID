@@ -96,19 +96,12 @@ def run_inference(args):
         index += 1
 
         sample_set = {'id': id, 'question': question, 'answer': answer}
-
-        # Load the video file
-        for fmt in video_formats:  # Added this line
-            temp_path = os.path.join(args.video_dir, f"v_{video_name}{fmt}")
-            if os.path.exists(temp_path):
-                video_path = temp_path
-                break
-
+        video_path = os.path.join(args.video_dir, f"{video_name}.mp4")
         # Check if the video exists
-        if os.path.exists(video_path):
-            video = load_video(video_path)
-            video = image_processor.preprocess(video, return_tensors='pt')['pixel_values'].half().cuda()
-            video = [video]
+        # if os.path.exists(video_path):
+        video = load_video(video_path)
+        video = image_processor.preprocess(video, return_tensors='pt')['pixel_values'].half().cuda()
+        video = [video]
 
         # try:
             # Run inference on the video and add the output to the list
