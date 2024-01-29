@@ -106,7 +106,7 @@ def run_inference(args):
         # try:
             # Run inference on the video and add the output to the list
             
-        # qs = question
+        qs = question
         # if model.config.mm_use_im_start_end:
         #     qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
         # else:
