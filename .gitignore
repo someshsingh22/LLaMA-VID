@@ -21,7 +21,6 @@ dist
 wandb
 output
 work_dirs
-data
 model_zoo
 
 checkpoints
