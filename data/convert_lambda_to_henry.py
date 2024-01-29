@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
 
-data = pd.read_csv('ad_verbalization.csv').drop_duplicates('video_id')
+data = pd.read_csv('ad_verbalization_oversample.csv').drop_duplicates('video_id')
 data['path']=data['video_id'].replace({int(f.split('_')[0]):f for f in os.listdir('videos')})
 
 def convert_data(id, video_path, instruction, answer):
@@ -18,7 +18,7 @@ def convert_data(id, video_path, instruction, answer):
             },
             {
                 "from": "gpt",
-                "value": str(answer)
+                "value": str(int(answer*100))
             }
         ]
     }
