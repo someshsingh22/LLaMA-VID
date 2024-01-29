@@ -23,14 +23,3 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
     --conv-mode vicuna_v1 &
 
 done
-
-wait
-
-python llamavid/eval/eval_activitynet_qa.py \
-    --pred_path ./work_dirs/eval_activitynet/$CKPT \
-    --output_dir ./work_dirs/eval_activitynet/$CKPT/results \
-    --output_json ./work_dirs/eval_activitynet/$CKPT/results.json \
-    --num_chunks $CHUNKS \
-    --num_tasks 16 \
-    --api_key $OPENAIKEY \
-    --api_base $OPENAIBASE
