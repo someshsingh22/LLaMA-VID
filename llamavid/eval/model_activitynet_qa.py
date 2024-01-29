@@ -96,7 +96,7 @@ def run_inference(args):
         index += 1
 
         sample_set = {'id': id, 'question': question, 'answer': answer}
-        video_path = os.path.join(args.video_dir, f"{video_name}.mp4")
+        video_path = os.path.join(args.video_dir, video_name)
         # Check if the video exists
         # if os.path.exists(video_path):
         video = load_video(video_path)
