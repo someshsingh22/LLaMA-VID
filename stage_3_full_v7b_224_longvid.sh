@@ -5,7 +5,7 @@ deepspeed llamavid/train/train_mem.py \
     --model_name_or_path ./work_dirs/llama-vid-13b-full-224-video-fps-1 \
     --version imgsp_v1 \
     --data_path ./data/lambda_train.json \
-    --video_folder ./data/video \
+    --video_folder ./data/videos \
     --vision_tower ./model_zoo/LAVIS/eva_vit_g.pth \
     --image_processor ./llamavid/processor/clip-patch14-224 \
     --mm_projector_type mlp2x_gelu \
