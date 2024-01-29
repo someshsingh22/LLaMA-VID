@@ -18,7 +18,7 @@ def convert_data(id, video_path, instruction, answer):
             },
             {
                 "from": "gpt",
-                "value": str(int(answer*100))
+                "value": str(answer)
             }
         ]
     }
