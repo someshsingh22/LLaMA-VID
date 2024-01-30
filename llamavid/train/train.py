@@ -919,7 +919,13 @@ class LazySupervisedDataset(Dataset):
                 # sample_fps = round(vr.get_avg_fps()/self.data_args.video_fps)
                 # frame_idx = [i for i in range(0, len(vr), sample_fps)]
                 # video = vr.get_batch(frame_idx).asnumpy()
-                video = extract_frames(video_file, self.data_args.video_fps)
+                # video = extract_frames(video_file, self.data_args.video_fps)
+                suffix = video_file.split('.')[-1]
+                if suffix != 'npy':
+                    print('Extracting frames from video file: {}'.format(video_file))
+                    video = np.load(video_file)
+                else:
+                    video = extract_frames(video_file, self.data_args.video_fps)
                 processor = self.data_args.image_processor
                 image = processor.preprocess(video, return_tensors='pt')['pixel_values']
                 sources = preprocess_multimodal(
