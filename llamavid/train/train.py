@@ -836,87 +836,78 @@ class LazySupervisedDataset(Dataset):
         return length_list
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        attempt, max_attempt = 0, 10
-        while attempt < max_attempt:
-            try:
-                sources = self.list_data_dict[i]
-                suffix = None
-                if isinstance(i, int):
-                    sources = [sources]
-                assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
-                if 'image' in sources[0]:
-                    image_file = self.list_data_dict[i]['image']
-                    image_folder = self.data_args.image_folder
-                    processor = self.data_args.image_processor
-                    
-                    # convert image type for OCR VQA dataset
-                    if image_file is not None:
-                        if 'ocr' in image_file:
-                            if not os.path.exists(os.path.join(image_folder, image_file)):
-                                image_file = image_file.replace(".jpg", ".png")
+            sources = self.list_data_dict[i]
+            suffix = None
+            if isinstance(i, int):
+                sources = [sources]
+            assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
+            if 'image' in sources[0]:
+                image_file = self.list_data_dict[i]['image']
+                image_folder = self.data_args.image_folder
+                processor = self.data_args.image_processor
+                
+                # convert image type for OCR VQA dataset
+                if image_file is not None:
+                    if 'ocr' in image_file:
+                        if not os.path.exists(os.path.join(image_folder, image_file)):
+                            image_file = image_file.replace(".jpg", ".png")
 
-                        # convert image for VG dataset
-                        elif 'VG_100K' in image_file:
-                            image_file = image_file.replace('VG_100K_2', 'images')
-                            image_file = image_file.replace('VG_100K', 'images')
-                    
-                    image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
-                    if self.data_args.image_aspect_ratio == 'pad':
-                        def expand2square(pil_img, background_color):
-                            width, height = pil_img.size
-                            if width == height:
-                                return pil_img
-                            elif width > height:
-                                result = Image.new(pil_img.mode, (width, width), background_color)
-                                result.paste(pil_img, (0, (width - height) // 2))
-                                return result
-                            else:
-                                result = Image.new(pil_img.mode, (height, height), background_color)
-                                result.paste(pil_img, ((height - width) // 2, 0))
-                                return result
-                        image = expand2square(image, tuple(int(x*255) for x in processor.image_mean))
-                        image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
-                    else:
-                        image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+                    # convert image for VG dataset
+                    elif 'VG_100K' in image_file:
+                        image_file = image_file.replace('VG_100K_2', 'images')
+                        image_file = image_file.replace('VG_100K', 'images')
+                
+                image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
+                if self.data_args.image_aspect_ratio == 'pad':
+                    def expand2square(pil_img, background_color):
+                        width, height = pil_img.size
+                        if width == height:
+                            return pil_img
+                        elif width > height:
+                            result = Image.new(pil_img.mode, (width, width), background_color)
+                            result.paste(pil_img, (0, (width - height) // 2))
+                            return result
+                        else:
+                            result = Image.new(pil_img.mode, (height, height), background_color)
+                            result.paste(pil_img, ((height - width) // 2, 0))
+                            return result
+                    image = expand2square(image, tuple(int(x*255) for x in processor.image_mean))
+                    image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+                else:
+                    image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+                sources = preprocess_multimodal(
+                    copy.deepcopy([e["conversations"] for e in sources]),
+                    self.data_args)
+            elif 'video' in sources[0]:
+                video_file = self.list_data_dict[i]['video']
+                video_folder = self.data_args.video_folder
+                video_file = os.path.join(video_folder, video_file)
+                suffix = video_file.split('.')[-1]
+                if not os.path.exists(video_file):
+                    print('File {} not exist!'.format(video_file))
+                
+                if suffix == 'pkl':
+                    video_info = pickle.load(open(video_file, 'rb'))
+                    image = torch.from_numpy(video_info['feats'][:, 1:])
+                    input_prompt = video_info['inputs'].replace('...', '')
+                    # replace the default image token with multiple tokens
+                    input_prompt = input_prompt.replace(DEFAULT_IMAGE_TOKEN, 
+                                                        DEFAULT_IMAGE_TOKEN * self.data_args.video_token)
+                    sources, query_prompt = preprocess_multimodal_movie(
+                        copy.deepcopy([e["conversations"] for e in sources]),
+                        self.data_args, input_prompt)
+                else:
+                    vr = VideoReader(video_file, ctx=cpu(0))
+                    sample_fps = round(vr.get_avg_fps()/self.data_args.video_fps)
+                    frame_idx = [i for i in range(0, len(vr), sample_fps)]
+                    video = vr.get_batch(frame_idx).asnumpy()
+                    processor = self.data_args.image_processor
+                    image = processor.preprocess(video, return_tensors='pt')['pixel_values']
                     sources = preprocess_multimodal(
                         copy.deepcopy([e["conversations"] for e in sources]),
                         self.data_args)
-                elif 'video' in sources[0]:
-                    video_file = self.list_data_dict[i]['video']
-                    video_folder = self.data_args.video_folder
-                    video_file = os.path.join(video_folder, video_file)
-                    suffix = video_file.split('.')[-1]
-                    if not os.path.exists(video_file):
-                        print('File {} not exist!'.format(video_file))
-                    
-                    if suffix == 'pkl':
-                        video_info = pickle.load(open(video_file, 'rb'))
-                        image = torch.from_numpy(video_info['feats'][:, 1:])
-                        input_prompt = video_info['inputs'].replace('...', '')
-                        # replace the default image token with multiple tokens
-                        input_prompt = input_prompt.replace(DEFAULT_IMAGE_TOKEN, 
-                                                            DEFAULT_IMAGE_TOKEN * self.data_args.video_token)
-                        sources, query_prompt = preprocess_multimodal_movie(
-                            copy.deepcopy([e["conversations"] for e in sources]),
-                            self.data_args, input_prompt)
-                    else:
-                        vr = VideoReader(video_file, ctx=cpu(0))
-                        sample_fps = round(vr.get_avg_fps()/self.data_args.video_fps)
-                        frame_idx = [i for i in range(0, len(vr), sample_fps)]
-                        video = vr.get_batch(frame_idx).asnumpy()
-                        processor = self.data_args.image_processor
-                        image = processor.preprocess(video, return_tensors='pt')['pixel_values']
-                        sources = preprocess_multimodal(
-                            copy.deepcopy([e["conversations"] for e in sources]),
-                            self.data_args)
-                else:
-                    sources = copy.deepcopy([e["conversations"] for e in sources])
-                
-                break
-            except:
-                attempt += 1
-                print(f"Error in loading {i}, retrying...")
-                i = random.randint(0, len(self.list_data_dict)-1)
+            else:
+                sources = copy.deepcopy([e["conversations"] for e in sources])
                 
 
         has_image = ('image' in self.list_data_dict[i]) or ('video' in self.list_data_dict[i])
