@@ -45,6 +45,24 @@ from decord import VideoReader, cpu
 
 local_rank = None
 
+import cv2
+import numpy as np
+
+def extract_frames(input_video_path, fps=1):
+    cap = cv2.VideoCapture(input_video_path)
+    video_fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_interval = int(video_fps / fps)
+    frames = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if cap.get(cv2.CAP_PROP_POS_FRAMES) % frame_interval == 0:
+            frames.append(frame)
+    cap.release()
+    frames_array = np.array(frames)
+    return frames_array
+
 
 def rank0_print(*args):
     if local_rank == 0:
@@ -897,10 +915,11 @@ class LazySupervisedDataset(Dataset):
                     copy.deepcopy([e["conversations"] for e in sources]),
                     self.data_args, input_prompt)
             else:
-                vr = VideoReader(video_file, ctx=cpu(0))
-                sample_fps = round(vr.get_avg_fps()/self.data_args.video_fps)
-                frame_idx = [i for i in range(0, len(vr), sample_fps)]
-                video = vr.get_batch(frame_idx).asnumpy()
+                # vr = VideoReader(video_file, ctx=cpu(0))
+                # sample_fps = round(vr.get_avg_fps()/self.data_args.video_fps)
+                # frame_idx = [i for i in range(0, len(vr), sample_fps)]
+                # video = vr.get_batch(frame_idx).asnumpy()
+                video = extract_frames(video_file, self.data_args.video_fps)
                 processor = self.data_args.image_processor
                 image = processor.preprocess(video, return_tensors='pt')['pixel_values']
                 sources = preprocess_multimodal(
