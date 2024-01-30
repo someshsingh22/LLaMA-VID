@@ -18,7 +18,7 @@ def convert_data(id, video_path, instruction, answer):
             },
             {
                 "from": "gpt",
-                "value": str(answer)
+                "value": str(answer).zfill(2)
             }
         ]
     }
