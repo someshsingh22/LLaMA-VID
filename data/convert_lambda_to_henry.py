@@ -14,7 +14,7 @@ def convert_data(id, video_path, instruction, answer):
         "conversations": [
             {
                 "from": "human",
-                "value": instruction.replace(pre, '') + "\n<image>\n"
+                "value": instruction.replace(pre, '').replace("0 to 99", "00 to 99") + "\n<image>\n"
             },
             {
                 "from": "gpt",
