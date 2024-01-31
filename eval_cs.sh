@@ -5,7 +5,7 @@ gpu_list="${CUDA_VISIBLE_DEVICES:-0}"
 IFS=',' read -ra GPULIST <<< "$gpu_list"
 
 CHUNKS=${#GPULIST[@]}
-CKPT = "henry-vid-cs-bs-0"
+CKPT="henry-vid-cs-bs-0"
 OPENAIKEY=""
 OPENAIBASE=""
 
