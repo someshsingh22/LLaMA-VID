@@ -1,7 +1,7 @@
 import argparse
 import torch
 
-from llamavid.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from llamavid.constants import IMAGE_TOKEN_INDEX
 from llamavid.conversation import conv_templates, SeparatorStyle
 from llamavid.model.builder import load_pretrained_model
 from llava.mm_utils import tokenizer_image_token, get_model_name_from_path, KeywordsStoppingCriteria
@@ -11,7 +11,6 @@ import os
 
 import math
 from tqdm import tqdm
-import numpy as np
 
 def split_list(lst, n):
     """Split a list into n (roughly) equal-sized chunks"""
