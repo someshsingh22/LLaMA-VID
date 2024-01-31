@@ -11,8 +11,24 @@ import os
 
 import math
 from tqdm import tqdm
+import numpy as np
+import cv2
 from decord import VideoReader, cpu
 
+def extract_frames(input_video_path, fps=1):
+    cap = cv2.VideoCapture(input_video_path)
+    video_fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_interval = int(video_fps / fps)
+    frames = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if cap.get(cv2.CAP_PROP_POS_FRAMES) % frame_interval == 0:
+            frames.append(frame)
+    cap.release()
+    frames_array = np.array(frames)
+    return frames_array
 
 def split_list(lst, n):
     """Split a list into n (roughly) equal-sized chunks"""
@@ -48,11 +64,14 @@ def parse_args():
 
 
 def load_video(video_path):
-    vr = VideoReader(video_path, ctx=cpu(0))
-    total_frame_num = len(vr)
-    fps = round(vr.get_avg_fps())
-    frame_idx = [i for i in range(0, len(vr), fps)]
-    spare_frames = vr.get_batch(frame_idx).asnumpy()
+    try:
+        vr = VideoReader(video_path, ctx=cpu(0))
+        total_frame_num = len(vr)
+        fps = round(vr.get_avg_fps())
+        frame_idx = [i for i in range(0, len(vr), fps)]
+        spare_frames = vr.get_batch(frame_idx).asnumpy()
+    except:
+        spare_frames = extract_frames(video_path, fps=1)
     return spare_frames
 
 
@@ -94,12 +113,11 @@ def run_inference(args):
         id = sample['question_id']
         answer = gt_answers[index]['answer']
         index += 1
-
         sample_set = {'id': id, 'question': question, 'answer': answer}
         video_path = os.path.join(args.video_dir, video_name)
         # Check if the video exists
         # if os.path.exists(video_path):
-        video = load_video(video_path)
+        video = np.load(video_path) if video_path.endswith('.npy') else load_video(video_path)
         video = image_processor.preprocess(video, return_tensors='pt')['pixel_values'].half().cuda()
         video = [video]
 
