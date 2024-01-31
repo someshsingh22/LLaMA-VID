@@ -922,9 +922,9 @@ class LazySupervisedDataset(Dataset):
                 # video = extract_frames(video_file, self.data_args.video_fps)
                 suffix = video_file.split('.')[-1]
                 if suffix == 'npy':
-                    print('Extracting frames from video file: {}'.format(video_file))
                     video = np.load(video_file)
                 else:
+                    print('Extracting frames from video file: {}'.format(video_file))
                     video = extract_frames(video_file, self.data_args.video_fps)
                 processor = self.data_args.image_processor
                 image = processor.preprocess(video, return_tensors='pt')['pixel_values']
