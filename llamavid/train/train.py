@@ -921,7 +921,7 @@ class LazySupervisedDataset(Dataset):
                 # video = vr.get_batch(frame_idx).asnumpy()
                 # video = extract_frames(video_file, self.data_args.video_fps)
                 suffix = video_file.split('.')[-1]
-                if suffix != 'npy':
+                if suffix == 'npy':
                     print('Extracting frames from video file: {}'.format(video_file))
                     video = np.load(video_file)
                 else:
