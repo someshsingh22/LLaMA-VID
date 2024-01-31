@@ -95,6 +95,7 @@ def run_inference(args):
             model.update_prompt([[cur_prompt]])
             output_ids = model.generate(
                 input_ids,
+                images=None,
                 do_sample=True,
                 temperature=0.2,
                 max_new_tokens=2048,
