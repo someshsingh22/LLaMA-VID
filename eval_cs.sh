@@ -10,7 +10,7 @@ OPENAIKEY=""
 OPENAIBASE=""
 
 for IDX in $(seq 0 $((CHUNKS-1))); do
-    CUDA_VISIBLE_DEVICES=${GPULIST[$IDX]} python llamavid/eval/model_lambda_qs.py \
+    CUDA_VISIBLE_DEVICES=${GPULIST[$IDX]} python llamavid/eval/model_lambda_cs.py \
     --model-path ./work_dirs/$CKPT \
     --gt_file_question ./data/cs_test_q.json \
     --gt_file_answers ./data/cs_test_a.json \
