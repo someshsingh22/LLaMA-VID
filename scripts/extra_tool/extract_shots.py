@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 output_dir="video_scenes",
                 num_images=1,
             )
-            nparry = get_shots_numpy(sorted(os.listdir(f"video_scenes/{video_id}")))
+            nparry = get_shots_numpy(sorted(os.listdir(f"video_scenes/videos/{video_id}")))
             np.save(f"video_scenes/npy/{video_id}.npy", nparry)
         except Exception as e:
             with open(f"error_csv_{args.process_idx}.text", "a") as f:
