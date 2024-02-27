@@ -65,11 +65,11 @@ if __name__ == "__main__":
             save_images(
                 scene_list=scene_list,
                 video=video,
-                image_name_template=f"{video_id}-$SCENE_NUMBER",
+                image_name_template=f"{video_id}/$SCENE_NUMBER",
                 output_dir="video_scenes",
                 num_images=1,
             )
-            nparry = get_shots_numpy([f"video_scenes/videos/{video_id}-{i}.jpg" for i in range(len(scene_list))])
+            nparry = get_shots_numpy(sorted(os.listdir(f"video_scenes/{video_id}")))
             np.save(f"video_scenes/npy/{video_id}.npy", nparry)
         except Exception as e:
             with open(f"error_csv_{args.process_idx}.text", "a") as f:
