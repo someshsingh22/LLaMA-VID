@@ -39,7 +39,7 @@ def get_shots_numpy(image_paths):
     Given a list of image paths, load all images as numpy array of shape (n, h, w, c)
     '''
     scenes = sorted(os.listdir(f"video_scenes/{video_id}"))
-    images = [cv2.imread(f"video_scenes/{video_id}/" + image_path) for image_path in image_paths]
+    images = [cv2.imread(f"video_scenes/{video_id}/" + scene) for scene in scenes]
     images = np.stack(images, axis=0)
     return images
 
