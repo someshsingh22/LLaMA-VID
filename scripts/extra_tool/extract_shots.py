@@ -44,7 +44,7 @@ def get_shots_numpy(image_paths):
 
 _suffix = os.listdir('videos')[args.process_idx :: args.num_process]
 if not os.path.exists(f"video_scenes/npy"):
-    os.makedirs(f"video_scenes")
+    os.makedirs(f"video_scenes/npy")
 
 if __name__ == "__main__":
     for suffix in tqdm(_suffix):
