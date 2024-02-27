@@ -38,7 +38,8 @@ def get_shots_numpy(image_paths):
     '''
     Given a list of image paths, load all images as numpy array of shape (n, h, w, c)
     '''
-    images = [cv2.imread(image_path) for image_path in image_paths]
+    scenes = sorted(os.listdir(f"video_scenes/{video_id}"))
+    images = [cv2.imread(f"video_scenes/{video_id}/" + image_path) for image_path in image_paths]
     images = np.stack(images, axis=0)
     return images
 
@@ -69,7 +70,7 @@ if __name__ == "__main__":
                 output_dir="video_scenes",
                 num_images=1,
             )
-            nparry = get_shots_numpy(sorted(os.listdir(f"video_scenes/{video_id}")))
+            nparry = get_shots_numpy(video_id)
             np.save(f"video_scenes/npy/{video_id}.npy", nparry)
         except Exception as e:
             raise e
