@@ -72,5 +72,6 @@ if __name__ == "__main__":
             nparry = get_shots_numpy(sorted(os.listdir(f"video_scenes/videos/{video_id}")))
             np.save(f"video_scenes/npy/{video_id}.npy", nparry)
         except Exception as e:
+            raise e
             with open(f"error_csv_{args.process_idx}.text", "a") as f:
                 f.write(suffix + "\n")
