@@ -30,20 +30,26 @@ def parse_arguments():
         default=16,
         help="Total number of processes (default: 16)",
     )
+    parser.add_argument(
+        "--video_folder", type=str, default="videos", help="Path to the video folder"
+    )
     return parser.parse_args()
+
 
 args = parse_arguments()
 
-def get_shots_numpy(image_paths):
-    '''
+
+def get_shots_numpy(video_id: str):
+    """
     Given a list of image paths, load all images as numpy array of shape (n, h, w, c)
-    '''
+    """
     scenes = sorted(os.listdir(f"video_scenes/{video_id}"))
     images = [cv2.imread(f"video_scenes/{video_id}/" + scene) for scene in scenes]
     images = np.stack(images, axis=0)
     return images
 
-_suffix = os.listdir('videos')[args.process_idx :: args.num_process]
+
+_suffix = os.listdir("videos")[args.process_idx :: args.num_process]
 if not os.path.exists(f"video_scenes/npy"):
     os.makedirs(f"video_scenes/npy")
 
@@ -61,8 +67,8 @@ if __name__ == "__main__":
                 scene_manager.add_detector(ContentDetector(20))
                 scene_manager.detect_scenes(video)
                 scene_list = scene_manager.get_scene_list()
-                
-            video_id = suffix.split('.')[0].split('/')[-1]
+
+            video_id = suffix.split(".")[0].split("/")[-1]
             save_images(
                 scene_list=scene_list,
                 video=video,
@@ -73,6 +79,5 @@ if __name__ == "__main__":
             nparry = get_shots_numpy(video_id)
             np.save(f"video_scenes/npy/{video_id}.npy", nparry)
         except Exception as e:
-            raise e
             with open(f"error_csv_{args.process_idx}.text", "a") as f:
                 f.write(suffix + "\n")
