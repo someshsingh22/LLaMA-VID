@@ -61,7 +61,7 @@ if __name__ == "__main__":
                 scene_manager.detect_scenes(video)
                 scene_list = scene_manager.get_scene_list()
                 
-            video_id = suffix.split('.')[0]
+            video_id = suffix.split('.')[0].split('/')[-1]
             save_images(
                 scene_list=scene_list,
                 video=video,
